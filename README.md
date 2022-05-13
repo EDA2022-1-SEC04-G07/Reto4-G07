@@ -17,5 +17,5 @@ Este directorio contiene todo el código de base que se entrega para el funciona
 Este directorio contiene las pruebas realizadas a los TADs, Estructuras de Datos y Algoritmos.
 
 Integrantes:
-- María Catalina Ibáñez Piñeres - 201922462 - m.ibanez@uniandes.edu.co
-- María Alejandra Pérez Petro - 201923972 - ma.perezp@uniandes.edu.co
+- María Catalina Ibáñez Piñeres, 201922462, m.ibanez@uniandes.edu.co
+- María Alejandra Pérez Petro, 201923972, ma.perezp@uniandes.edu.co
