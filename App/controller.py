@@ -58,7 +58,11 @@ def loadTrips(analyzer, tripsfile):
         name = trip['Start Station Name'] != "" and trip["End Station Name"] != ""
         stopid = trip['End Station Id'] != "" and trip["Start Station Id"] != ""
         bikeid = trip["Bike Id"] != ""
-        if name and stopid and bikeid:
+        tripid = trip["Trip Id"] != ""
+        tripduration = trip["Trip  Duration"] != ""
+        time = trip["Start Time"] != "" and trip["End Time"] != ""
+        user = trip["User Type"] != ""
+        if name and stopid and bikeid and tripid and tripduration and time and user:
             difstop = float(trip['Start Station Id']) != float(trip['End Station Id'])
             if difstop:
                 model.addTrips(analyzer, trip, trip["Start Station Name"]+"-"+trip["End Station Name"])
