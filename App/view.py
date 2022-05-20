@@ -25,7 +25,10 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
-
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
+import pandas as pd
+import tabulate
 
 """
 La vista se encarga de la interacción con el usuario
@@ -47,6 +50,34 @@ def printMenu():
 
 catalog = None
 
+def optiontwo(analyzer, vertices):
+    tabla = analyzer["stations_table"]
+    lista = [["Station Name", "Station Id", "Indegree", "Outdegree"]]
+    for index in range(1,6):
+        vertex = lt.getElement(vertices, index)
+        indegree = controller.indegree(analyzer, vertex)
+        outdegree = controller.outdegree(analyzer, vertex)
+        entry = mp.get(tabla, vertex)
+        stationid = me.getValue(entry)
+        lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]        
+        s = pd.Series(lista2).str.wrap(20)
+        lista.append(s)
+
+    for index in range(lt.size(vertices)-4, lt.size(vertices)+1):
+        vertex = lt.getElement(vertices, index)
+        indegree = controller.indegree(analyzer, vertex)
+        outdegree = controller.outdegree(analyzer, vertex)
+        entry = mp.get(tabla, vertex)
+        stationid = me.getValue(entry)
+        lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]         
+        s = pd.Series(lista2).str.wrap(20)
+        lista.append(s)
+    print("Los primeros y últimos 5 vértices registrados en el grafo son: ")
+    print(tabulate.tabulate(lista,  tablefmt = "grid"))
+        
+
+
+
 """
 Menu principal
 """
@@ -55,9 +86,18 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
-
+        cont = controller.init()
     elif int(inputs[0]) == 2:
-        pass
+        load = controller.loadTrips(cont, "Bikeshare/Bikeshare-ridership-2021-utf8-small.csv")
+        viajes = load[1]
+        vertices = load[2]
+        numedges = controller.totalConnections(cont)
+        numvertex = controller.totalStops(cont)
+        print("Total de viajes obtenidos: ", viajes)
+        print('Numero de vertices: ' + str(numvertex))
+        print('Numero de arcos: ' + str(numedges))
+        optiontwo(cont, vertices)
+
 
     elif int(inputs[0]) == 3:
         pass
