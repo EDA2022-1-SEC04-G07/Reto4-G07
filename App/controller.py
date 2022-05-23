@@ -66,12 +66,12 @@ def loadTrips(analyzer, tripsfile):
             difstop = float(trip['Start Station Id']) != float(trip['End Station Id'])
             if difstop:
                 model.addTrips(analyzer, trip, trip["Start Station Name"]+"-"+trip["End Station Name"])
-                model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"])
-                model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"])
+                model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"], trip["Start Time"], trip["User Type"])
+                model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], trip["User Type"])
                 viajes += 1
     
     vertices = model.addGraph(analyzer)
-    return analyzer, viajes, vertices
+    return analyzer, viajes , vertices
 
 # Funciones de ordenamiento
 
@@ -96,6 +96,11 @@ def indegree(analyzer, vertex):
 def outdegree(analyzer, vertex):
     return model.outdegree(analyzer, vertex)
 
+#Requerimiento 1
+def Requerimiento1(analyzer):
+    return model.Top5estaciones_mas_viajes(analyzer)
+
 #Requerimiento 2
 def Requerimiento2(analyzer, vertex, time, minstations, maxroutes):
     return model.possibleRoutes(analyzer, vertex, time, minstations, maxroutes)
+

@@ -38,6 +38,7 @@ from DISClib.Algorithms.Graphs import bfs
 from DISClib.Algorithms.Graphs import dfs
 from DISClib.Algorithms.Graphs import dfo
 from DISClib.Utils import error as error
+from DISClib.Algorithms.Sorting import mergesort as mes
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
@@ -76,7 +77,6 @@ def newAnalyzer():
 
 
 # Funciones para agregar informacion al grafo
-
 def addGraph(analyzer):
     llaves = mp.keySet(analyzer["trip_table"])
     vertices = lt.newList("SINGLE_LINKED")
@@ -101,7 +101,7 @@ def addGraph(analyzer):
 # Funciones para agregar informacion al catalogo
 
 def addTrips(catalog, trip, station):
-    """Esta función adiciona un track a la lista de tracks de un artista"""
+    """Esta función adiciona un """
     table = catalog['trip_table']
     existstation = mp.contains(table, station)
     if existstation:
@@ -112,12 +112,23 @@ def addTrips(catalog, trip, station):
         mp.put(table, station, station_search)
     lt.addLast(station_search, trip)
 
-def addStations(catalog, trip, station):
-    """Esta función adiciona un track a la lista de tracks de un artista"""
+def addStations(catalog, station_id, station_name, time, usertype): 
+    """Esta función adiciona un """
     table = catalog['stations_table']
-    existstation = mp.contains(table, station)
+    existstation = mp.contains(table, station_name)
+
     if not existstation:
-        mp.put(table, station, trip)
+        info ={"station_id": station_id, "time": lt.newList(datastructure = "ARRAY_LIST") , "nAnnual": 0, "nCasual": 0}
+    else:
+        info = me.getValue(mp.get(table, station_name))
+
+    if usertype == "Casual Member":
+        info["nCasual"] += 1
+    elif usertype == "Annual Member":
+        info["nAnnual"] += 1
+    
+    lt.addLast(info["time"], time)
+    mp.put(table, station_name, info)
     
 
 # Funciones para creacion de datos
@@ -125,16 +136,11 @@ def addStations(catalog, trip, station):
 # Funciones de consulta
 
 def totalStops(analyzer):
-    """
-    Retorna el total de estaciones (vertices) del grafo
-    """
+    """Retorna el total de estaciones (vertices) del grafo """
     return gr.numVertices(analyzer['connections'])
 
-
 def totalConnections(analyzer):
-    """
-    Retorna el total arcos del grafo
-    """
+    """Retorna el total arcos del grafo"""
     return gr.numEdges(analyzer['connections'])
 
 def indegree(analyzer, vertex):
@@ -142,6 +148,51 @@ def indegree(analyzer, vertex):
 
 def outdegree(analyzer, vertex):
     return gr.outdegree(analyzer["connections"], vertex)
+
+def sort(lst, cmpfunction):
+    size = lt.size(lst)
+    pos1 = 1
+    while pos1 < size:
+        minimum = pos1    # minimun tiene el menor elemento
+        pos2 = pos1 + 1
+        while (pos2 <= size):
+            if (cmpfunction(lt.getElement(lst, pos2),
+               (lt.getElement(lst, minimum)))):
+                minimum = pos2  # minimum = posición elemento más pequeño
+            pos2 += 1
+        lt.exchange(lst, pos1, minimum)  # elemento más pequeño -> elem pos1
+        pos1 += 1
+    return lst
+    
+# Requerimiento 1
+def Top5estaciones_mas_viajes(analyzer):
+    lista_estaciones= lt.newList("SINGLE_LINKED")
+    lista_vertices = gr.vertices(analyzer["connections"])
+    for station_name in lt.iterator(lista_vertices):
+        
+        existstation = mp.contains(analyzer['stations_table'], station_name)
+        if existstation:
+            info = me.getValue(mp.get(analyzer['stations_table'], station_name))
+
+        info["station_name"] = station_name
+        info["outdegree"] = outdegree(analyzer, station_name)
+        lt.addLast(lista_estaciones, info)
+    sorted_list = mes.sort(lista_vertices, cmpOutDegree)
+    Top5Estaciones = lt.subList(sorted_list, 1, 5)
+    return Top5Estaciones
+
+
+def cmpOutDegree(estacion1, estacion2):
+    """
+    Devuelve verdadero (True) si los "followers de artist1 son menores que los del artist2
+    Args:
+    artist1: información del primer artista que incluye su valor "followers" 
+    artist2: información del segundo artista que incluye su valor "followers
+    """
+    if estacion1["outdegree"] < estacion2["outdegree"]:
+        return True
+    elif estacion1["outdegree"] >= estacion2["outdegree"]:
+        return False
 
 # Requerimiento 2
 def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
@@ -152,19 +203,11 @@ def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
         print(lt.getElement(lista, i))
         print(lt.getElement(lista2, i))
 
+# Requerimiento 3 
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
-# Funciones de ordenamiento
 
-def mas_viajes_estaciones(analyzer):
-    mayor = 0
-    mayor_vertice = None
-    lista_vertices = gr.vertices(analyzer["connections"])
-    for vertex in lt.iterator(lista_vertices):
-        degree = outdegree(analyzer, vertex) + indegree(analyzer, vertex)
-        if mayor < degree:
-            mayor = degree
-            mayor_vertice = vertex
 
         

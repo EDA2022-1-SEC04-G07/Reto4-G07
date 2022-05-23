@@ -39,14 +39,15 @@ operación solicitada
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- Comprar bicicletas para las estaciones con más viajes de origen")
-    print("3- Planear paseos turísticos por la ciudad")
-    print("4- Reconocer los componentes fuertemente conectados del sistema")
-    print("5- Planear una ruta rápida para el usuario")
-    print("6- Reportar rutas en un rango de fechas para los usuarios anuales")
-    print("7- Planear el mantenimiento preventivo de bicicletas")
-    print("8- La estación más frecuentada por los visitantes")
+    print("1- Inicializar Analizador")
+    print("2- Cargar información en el catálogo")
+    print("3- Comprar bicicletas para las estaciones con más viajes de origen")
+    print("4- Planear paseos turísticos por la ciudad")
+    print("5- Reconocer los componentes fuertemente conectados del sistema")
+    print("6- Planear una ruta rápida para el usuario")
+    print("7- Reportar rutas en un rango de fechas para los usuarios anuales")
+    print("8- Planear el mantenimiento preventivo de bicicletas")
+    print("9- La estación más frecuentada por los visitantes")
 
 catalog = None
 
@@ -58,7 +59,7 @@ def optiontwo(analyzer, vertices):
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
         entry = mp.get(tabla, vertex)
-        stationid = me.getValue(entry)
+        stationid = me.getValue(entry)["station_id"]
         lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]        
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
@@ -68,13 +69,24 @@ def optiontwo(analyzer, vertices):
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
         entry = mp.get(tabla, vertex)
-        stationid = me.getValue(entry)
+        stationid = me.getValue(entry)["station_id"]
         lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]         
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
     print("Los primeros y últimos 5 vértices registrados en el grafo son: ")
     print(tabulate.tabulate(lista,  tablefmt = "grid"))
-        
+
+#Requerimiento 1       
+def printTop5Estaciones_mas_viajes(Top5Estaciones):
+    tabla = [["Station Name", "Station Id", "nViajes", "nCasual", "nAnnual"]]
+    for index in range(1,6):
+        info= lt.getElement(Top5Estaciones, index)
+        linea = [info["station_name"], info["station_id"], str(info["outdegree"]), str(info["nCasual"]), str(info["nAnnual"])]   
+        s = pd.Series(linea).str.wrap(20)
+        tabla.append(s)
+    print("Las 5 estaciones con más viajes de origen son: ")
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
 
 """
 Menu principal
@@ -85,6 +97,7 @@ while True:
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
         cont = controller.init()
+
     elif int(inputs[0]) == 2:
         load = controller.loadTrips(cont, "Bikeshare/Bikeshare-ridership-2021-utf8-small.csv")
         viajes = load[1]
@@ -96,9 +109,9 @@ while True:
         print('Numero de arcos: ' + str(numedges))
         optiontwo(cont, vertices)
 
-
     elif int(inputs[0]) == 3:
-        pass
+        Top5Estaciones = controller.Requerimiento1(cont)
+        printTop5Estaciones_mas_viajes(Top5Estaciones)
 
     elif int(inputs[0]) == 4:
         vertex = input("Ingrese la estación de inicio o salida: ")
