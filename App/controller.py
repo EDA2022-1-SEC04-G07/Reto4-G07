@@ -95,3 +95,7 @@ def indegree(analyzer, vertex):
 
 def outdegree(analyzer, vertex):
     return model.outdegree(analyzer, vertex)
+
+#Requerimiento 2
+def Requerimiento2(analyzer, vertex, time, minstations, maxroutes):
+    return model.possibleRoutes(analyzer, vertex, time, minstations, maxroutes)

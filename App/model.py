@@ -143,7 +143,28 @@ def indegree(analyzer, vertex):
 def outdegree(analyzer, vertex):
     return gr.outdegree(analyzer["connections"], vertex)
 
+# Requerimiento 2
+def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
+    recorridos = dfs.DepthFirstSearch(analyzer["connections"], vertex)
+    lista = (mp.keySet(recorridos["visited"]))
+    lista2 = (mp.valueSet(recorridos["visited"]))
+    for i in range(1, lt.size(lista)+1):
+        print(lt.getElement(lista, i))
+        print(lt.getElement(lista2, i))
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 # Funciones de ordenamiento
+
+def mas_viajes_estaciones(analyzer):
+    mayor = 0
+    mayor_vertice = None
+    lista_vertices = gr.vertices(analyzer["connections"])
+    for vertex in lt.iterator(lista_vertices):
+        degree = outdegree(analyzer, vertex) + indegree(analyzer, vertex)
+        if mayor < degree:
+            mayor = degree
+            mayor_vertice = vertex
+
+        

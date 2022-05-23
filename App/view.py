@@ -76,8 +76,6 @@ def optiontwo(analyzer, vertices):
     print(tabulate.tabulate(lista,  tablefmt = "grid"))
         
 
-
-
 """
 Menu principal
 """
@@ -103,7 +101,12 @@ while True:
         pass
 
     elif int(inputs[0]) == 4:
-        pass
+        vertex = input("Ingrese la estación de inicio o salida: ")
+        time = input("Ingrese el tiempo máximo que puede tomar el viaje: ")
+        minstations = input("Ingrese el número minimo de estaciones de parada para la ruta: ")
+        maxroutes = input("Ingrese el número máximo de rutas de respuesta: ")
+        recorridos = controller.Requerimiento2(cont, vertex, time, minstations, maxroutes)
+        print(recorridos)
 
     elif int(inputs[0]) == 5:
         pass
