@@ -148,25 +148,10 @@ def indegree(analyzer, vertex):
 
 def outdegree(analyzer, vertex):
     return gr.outdegree(analyzer["connections"], vertex)
-
-def sort(lst, cmpfunction):
-    size = lt.size(lst)
-    pos1 = 1
-    while pos1 < size:
-        minimum = pos1    # minimun tiene el menor elemento
-        pos2 = pos1 + 1
-        while (pos2 <= size):
-            if (cmpfunction(lt.getElement(lst, pos2),
-               (lt.getElement(lst, minimum)))):
-                minimum = pos2  # minimum = posición elemento más pequeño
-            pos2 += 1
-        lt.exchange(lst, pos1, minimum)  # elemento más pequeño -> elem pos1
-        pos1 += 1
-    return lst
     
 # Requerimiento 1
 def Top5estaciones_mas_viajes(analyzer):
-    lista_estaciones= lt.newList("SINGLE_LINKED")
+    lista_estaciones = lt.newList(datastructure = "ARRAY_LIST")
     lista_vertices = gr.vertices(analyzer["connections"])
     for station_name in lt.iterator(lista_vertices):
         
@@ -177,22 +162,16 @@ def Top5estaciones_mas_viajes(analyzer):
         info["station_name"] = station_name
         info["outdegree"] = outdegree(analyzer, station_name)
         lt.addLast(lista_estaciones, info)
-    sorted_list = mes.sort(lista_vertices, cmpOutDegree)
+
+    sorted_list = mes.sort(lista_estaciones, cmpOutDegree)
     Top5Estaciones = lt.subList(sorted_list, 1, 5)
     return Top5Estaciones
 
 
 def cmpOutDegree(estacion1, estacion2):
-    """
-    Devuelve verdadero (True) si los "followers de artist1 son menores que los del artist2
-    Args:
-    artist1: información del primer artista que incluye su valor "followers" 
-    artist2: información del segundo artista que incluye su valor "followers
-    """
-    if estacion1["outdegree"] < estacion2["outdegree"]:
-        return True
-    elif estacion1["outdegree"] >= estacion2["outdegree"]:
-        return False
+    """Devuelve verdadero (True) si el outdegree de estacion1 es mayor que el de estacion2"""
+    return estacion1["outdegree"] > estacion2["outdegree"]
+
 
 # Requerimiento 2
 def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
