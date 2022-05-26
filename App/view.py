@@ -78,15 +78,14 @@ def optiontwo(analyzer, vertices):
 
 #Requerimiento 1       
 def printTop5Estaciones_mas_viajes(Top5Estaciones):
-    tabla = [["Station Name", "Station Id", "nViajes", "nCasual", "nAnnual"]]
+    tabla = [["Station Name", "Station Id", "nViajes", "nCasual", "nAnnual", "datetimeMoreTrips"]]
     for index in range(1,6):
         info= lt.getElement(Top5Estaciones, index)
-        linea = [info["station_name"], info["station_id"], str(info["outdegree"]), str(info["nCasual"]), str(info["nAnnual"])]   
+        linea = [info["station_name"], str(info["station_id"]), str(info["outdegree"]), str(info["nCasual"]), str(info["nAnnual"]), str(info["more_trips_datetime"])]   
         s = pd.Series(linea).str.wrap(20)
         tabla.append(s)
     print("Las 5 estaciones con más viajes de origen son: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
-
 
 """
 Menu principal

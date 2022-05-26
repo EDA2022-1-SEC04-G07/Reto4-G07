@@ -39,6 +39,7 @@ from DISClib.Algorithms.Graphs import dfs
 from DISClib.Algorithms.Graphs import dfo
 from DISClib.Utils import error as error
 from DISClib.Algorithms.Sorting import mergesort as mes
+import datetime
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
@@ -112,25 +113,31 @@ def addTrips(catalog, trip, station):
         mp.put(table, station, station_search)
     lt.addLast(station_search, trip)
 
-def addStations(catalog, station_id, station_name, time, usertype): 
-    """Esta función adiciona un """
+
+def addStations(catalog, station_id, station_name, time, usertype, startStation): 
+    """Esta función adiciona una estación a la tabla de hash de estaciones """
     table = catalog['stations_table']
     existstation = mp.contains(table, station_name)
 
     if not existstation:
-        info ={"station_id": station_id, "time": lt.newList(datastructure = "ARRAY_LIST") , "nAnnual": 0, "nCasual": 0}
+        info ={"station_id": station_id, "datetime_start": {}, 
+        "datetime_end": {}, "nAnnual": 0, "nCasual": 0, "nTripsEnd":0}
     else:
         info = me.getValue(mp.get(table, station_name))
 
-    if usertype == "Casual Member":
-        info["nCasual"] += 1
-    elif usertype == "Annual Member":
-        info["nAnnual"] += 1
-    
-    lt.addLast(info["time"], time)
+    if startStation:
+        if usertype == "Casual Member":
+            info["nCasual"] += 1
+        elif usertype == "Annual Member":
+            info["nAnnual"] += 1
+        info["datetime_start"][time] = info["datetime_start"].get(time, 0) + 1
+       
+    else:
+        info["datetime_end"][time] = info["datetime_end"].get(time, 0) + 1
+        info["nTripsEnd"] += 1
+        
     mp.put(table, station_name, info)
     
-
 # Funciones para creacion de datos
 
 # Funciones de consulta
@@ -148,7 +155,17 @@ def indegree(analyzer, vertex):
 
 def outdegree(analyzer, vertex):
     return gr.outdegree(analyzer["connections"], vertex)
-    
+
+def more_trips_datetime(dict):
+    """Esta función retorna la fecha_hora con mayor frecuencia de viajes"""
+    max = 0
+    max_datetime = ""
+    for DATETIME in dict:
+        if dict[DATETIME] > max:
+            max_datetime = DATETIME
+            max = dict[DATETIME]
+    return max_datetime
+
 # Requerimiento 1
 def Top5estaciones_mas_viajes(analyzer):
     lista_estaciones = lt.newList(datastructure = "ARRAY_LIST")
@@ -161,6 +178,7 @@ def Top5estaciones_mas_viajes(analyzer):
 
         info["station_name"] = station_name
         info["outdegree"] = outdegree(analyzer, station_name)
+        info["more_trips_datetime"] = more_trips_datetime(info["datetime_start"])
         lt.addLast(lista_estaciones, info)
 
     sorted_list = mes.sort(lista_estaciones, cmpOutDegree)

@@ -24,7 +24,7 @@ import config as cf
 import model
 import csv
 from DISClib.ADT import list as lt
-
+import datetime
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -63,11 +63,27 @@ def loadTrips(analyzer, tripsfile):
         time = trip["Start Time"] != "" and trip["End Time"] != ""
         user = trip["User Type"] != ""
         if name and stopid and bikeid and tripid and tripduration and time and user:
-            difstop = float(trip['Start Station Id']) != float(trip['End Station Id'])
+            trip['End Station Id'] = int(float(trip['End Station Id']))
+            trip['Start Station Id'] = int(float(trip['Start Station Id']))
+            difstop = trip['Start Station Id'] != trip['End Station Id']
             if difstop:
+                try:
+                    trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%d/%m/%Y %H:%M") 
+                except Exception:
+                    try:
+                        trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%m/%d/%Y %H:%M")
+                    except Exception:
+                        print(trip["Start Time"])
+                try:
+                    trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%d/%m/%Y %H:%M") 
+                except Exception:
+                    try:
+                        trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%m/%d/%Y %H:%M") 
+                    except Exception:
+                        print( trip["End Time"])
                 model.addTrips(analyzer, trip, trip["Start Station Name"]+"-"+trip["End Station Name"])
-                model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"], trip["Start Time"], trip["User Type"])
-                model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], trip["User Type"])
+                model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"], trip["Start Time"], trip["User Type"], True)
+                model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], None, False)
                 viajes += 1
     
     vertices = model.addGraph(analyzer)
