@@ -55,18 +55,16 @@ def loadTrips(analyzer, tripsfile):
     input_file = csv.DictReader(open(tripsfile, encoding="utf-8"), delimiter=",")
     viajes = 0
     for trip in input_file:
-        name = trip['Start Station Name'] != "" and trip["End Station Name"] != ""
         stopid = trip['End Station Id'] != "" and trip["Start Station Id"] != ""
         bikeid = trip["Bike Id"] != ""
-        tripid = trip["Trip Id"] != ""
         tripduration = trip["Trip  Duration"] != ""
-        time = trip["Start Time"] != "" and trip["End Time"] != ""
-        user = trip["User Type"] != ""
-        if name and stopid and bikeid and tripid and tripduration and time and user:
+        if stopid and bikeid and tripduration:
+            difcero = int(float(trip["Trip  Duration"])) > 0
             trip['End Station Id'] = int(float(trip['End Station Id']))
             trip['Start Station Id'] = int(float(trip['Start Station Id']))
-            difstop = trip['Start Station Id'] != trip['End Station Id']
-            if difstop:
+            difstop = trip['Start Station Name'] != trip['End Station Name'] 
+            #difstop = int(float(trip['Start Station Id'])) != int(float(trip['End Station Id'])) 
+            if difstop and difcero:
                 try:
                     trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%d/%m/%Y %H:%M") 
                 except Exception:
@@ -119,4 +117,8 @@ def Requerimiento1(analyzer):
 #Requerimiento 2
 def Requerimiento2(analyzer, vertex, time, minstations, maxroutes):
     return model.possibleRoutes(analyzer, vertex, time, minstations, maxroutes)
+
+#Requerimiento 3
+def Requerimiento3(analyzer):
+    return model.connectedComponents(analyzer)
 

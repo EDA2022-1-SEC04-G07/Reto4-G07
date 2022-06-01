@@ -54,13 +54,14 @@ catalog = None
 def optiontwo(analyzer, vertices):
     tabla = analyzer["stations_table"]
     lista = [["Station Name", "Station Id", "Indegree", "Outdegree"]]
+
     for index in range(1,6):
         vertex = lt.getElement(vertices, index)
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
-        entry = mp.get(tabla, vertex)
+        entry = mp.get(tabla, vertex[5:])
         stationid = me.getValue(entry)["station_id"]
-        lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]        
+        lista2 = [vertex[5:], str(stationid), str(indegree), str(outdegree)]        
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
 
@@ -68,9 +69,9 @@ def optiontwo(analyzer, vertices):
         vertex = lt.getElement(vertices, index)
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
-        entry = mp.get(tabla, vertex)
+        entry = mp.get(tabla, vertex[5:])
         stationid = me.getValue(entry)["station_id"]
-        lista2 = [vertex, str(stationid), str(indegree), str(outdegree)]         
+        lista2 = [vertex[5:], str(stationid), str(indegree), str(outdegree)]         
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
     print("Los primeros y últimos 5 vértices registrados en el grafo son: ")
@@ -121,7 +122,13 @@ while True:
         print(recorridos)
 
     elif int(inputs[0]) == 5:
-        pass
+        con = controller.Requerimiento3(cont)
+        print("=============== Req No. 3 Inputs ===============")
+        print("+++ calculating the strongly connected components +++")
+        print("=============== Req No. 3 Answer ===============")
+        print("There are", con, "Strongly Connected Components (SCC) in the graph")
+        print("+++ The SCC details are: +++")
+
 
     elif int(inputs[0]) == 6:
         pass

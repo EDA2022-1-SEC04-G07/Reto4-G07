@@ -85,15 +85,19 @@ def addGraph(analyzer):
         suma = 0
         entry = mp.get(analyzer["trip_table"], key)
         station_search = me.getValue(entry)
-        if not (gr.containsVertex(analyzer["connections"], lt.getElement(station_search, 1)["Start Station Name"])):
-            gr.insertVertex(analyzer["connections"], lt.getElement(station_search, 1)["Start Station Name"])
-            lt.addLast(vertices, lt.getElement(station_search, 1)["Start Station Name"])
-        if not (gr.containsVertex(analyzer["connections"], lt.getElement(station_search, 1)["End Station Name"])):
-            gr.insertVertex(analyzer["connections"], lt.getElement(station_search, 1)["End Station Name"])
-            lt.addLast(vertices, lt.getElement(station_search, 1)["End Station Name"])
+        start_station_name = lt.getElement(station_search, 1)["Start Station Name"]
+        end_station_name = lt.getElement(station_search, 1)["End Station Name"]
+        start_station_id = lt.getElement(station_search, 1)["Start Station Id"]
+        end_station_id = lt.getElement(station_search, 1)["End Station Id"]
+        if not gr.containsVertex(analyzer["connections"],str(int(start_station_id))+ "-" + start_station_name):
+            gr.insertVertex(analyzer["connections"], str(int(start_station_id))+ "-" + start_station_name)
+            lt.addLast(vertices, str(int(start_station_id))+ "-" + start_station_name)
+        if not gr.containsVertex(analyzer["connections"], str(int(end_station_id))+"-"+end_station_name):
+            gr.insertVertex(analyzer["connections"], str(int(end_station_id))+"-"+end_station_name)
+            lt.addLast(vertices, str(int(end_station_id))+"-"+end_station_name)
         for station in lt.iterator(station_search):
             suma += int(float(station["Trip  Duration"]))
-            A, B = station["Start Station Name"], station["End Station Name"]
+            A, B = str(int(start_station_id))+ "-" + start_station_name, str(int(end_station_id))+"-"+end_station_name
         promedio = suma/lt.size(station_search)
         gr.addEdge(analyzer["connections"], A, B, promedio)
     return vertices
@@ -201,7 +205,10 @@ def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
         print(lt.getElement(lista2, i))
 
 # Requerimiento 3 
-
+def connectedComponents(analyzer):
+    componentes = scc.KosarajuSCC(analyzer["connections"])
+    print(mp.keySet(componentes["idscc"]))
+    return componentes
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
