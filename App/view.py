@@ -59,9 +59,12 @@ def optiontwo(analyzer, vertices):
         vertex = lt.getElement(vertices, index)
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
-        entry = mp.get(tabla, vertex[5:])
+        entry = mp.get(tabla, vertex)
         stationid = me.getValue(entry)["station_id"]
-        lista2 = [vertex[5:], str(stationid), str(indegree), str(outdegree)]        
+        stationname = me.getValue(entry)["station_name"]
+        if stationname == "":
+            stationname = "Unknown"
+        lista2 = [stationname, str(stationid), str(indegree), str(outdegree)]        
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
 
@@ -69,9 +72,12 @@ def optiontwo(analyzer, vertices):
         vertex = lt.getElement(vertices, index)
         indegree = controller.indegree(analyzer, vertex)
         outdegree = controller.outdegree(analyzer, vertex)
-        entry = mp.get(tabla, vertex[5:])
+        entry = mp.get(tabla, vertex)
         stationid = me.getValue(entry)["station_id"]
-        lista2 = [vertex[5:], str(stationid), str(indegree), str(outdegree)]         
+        stationname = me.getValue(entry)["station_name"]
+        if stationname == "":
+            stationname = "Unknown"
+        lista2 = [stationname, str(stationid), str(indegree), str(outdegree)]         
         s = pd.Series(lista2).str.wrap(20)
         lista.append(s)
     print("Los primeros y últimos 5 vértices registrados en el grafo son: ")
@@ -86,6 +92,22 @@ def printTop5Estaciones_mas_viajes(Top5Estaciones):
         s = pd.Series(linea).str.wrap(20)
         tabla.append(s)
     print("Las 5 estaciones con más viajes de origen son: ")
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+#Requerimiento 3      
+def printConnectedComponents(list):
+    tabla = [["SSC size", "Max out station ID", "Max out station name", "Max in station ID", "Max in station name"]]
+    for i in range(1,4):
+        dic = lt.getElement(list, i)
+        linea = [str(dic["size"]), dic["maxStart"][:4], dic["maxStart"][5:], dic["maxEnd"][:4], dic["maxEnd"][5:]]   
+        s = pd.Series(linea).str.wrap(20)
+        tabla.append(s)
+    for i in range(lt.size(list)-2,lt.size(list)+1):
+        dic = lt.getElement(list, i)
+        linea = [str(dic["size"]), dic["maxStart"][:4], dic["maxStart"][5:], dic["maxEnd"][:4], dic["maxEnd"][5:]]   
+        s = pd.Series(linea).str.wrap(20)
+        tabla.append(s)
+    print("The first 3 and last 3 of the SCC are: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
 """
@@ -122,12 +144,17 @@ while True:
         print(recorridos)
 
     elif int(inputs[0]) == 5:
-        con = controller.Requerimiento3(cont)
         print("=============== Req No. 3 Inputs ===============")
         print("+++ calculating the strongly connected components +++")
-        print("=============== Req No. 3 Answer ===============")
+        
+        req = controller.Requerimiento3(cont)
+        con = req[0]
+        list = req[1]
+
+        print("\n=============== Req No. 3 Answer ===============")
         print("There are", con, "Strongly Connected Components (SCC) in the graph")
-        print("+++ The SCC details are: +++")
+        print("\n+++ The SCC details are: +++")
+        printConnectedComponents(list)
 
 
     elif int(inputs[0]) == 6:

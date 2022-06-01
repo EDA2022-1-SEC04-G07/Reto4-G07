@@ -79,7 +79,7 @@ def loadTrips(analyzer, tripsfile):
                         trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%m/%d/%Y %H:%M") 
                     except Exception:
                         print( trip["End Time"])
-                model.addTrips(analyzer, trip, trip["Start Station Name"]+"-"+trip["End Station Name"])
+                model.addTrips(analyzer, trip, str(int(trip["Start Station Id"]))+ "-"+trip["Start Station Name"]+"--"+str(int(trip["End Station Id"]))+ "-" + trip["End Station Name"])
                 model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"], trip["Start Time"], trip["User Type"], True)
                 model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], None, False)
                 viajes += 1
