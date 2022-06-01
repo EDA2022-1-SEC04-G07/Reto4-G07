@@ -72,6 +72,9 @@ def newAnalyzer():
         analyzer['stations_table'] = mp.newMap(562000,
                                    maptype='PROBING',
                                    loadfactor=0.5)
+        analyzer["bike_id"] = mp.newMap(562000,
+                                   maptype='PROBING',
+                                   loadfactor=0.5)
         return analyzer
     except Exception as exp:
         error.reraise(exp, 'model:newAnalyzer')
@@ -143,24 +146,35 @@ def addStations(catalog, station_id, station_name, time, usertype, startStation)
         
     mp.put(table, str(int(station_id)) + "-" + station_name, info)
 
+def addBikeId(catalog, trip, bikeid):
+    """Esta función adiciona un """
+    table = catalog['bike_id']
+    existbike = mp.contains(table, int(float(bikeid)))
+    if existbike:
+        entry = mp.get(table, int(float(bikeid)))
+        bike_search = me.getValue(entry)
+    else:
+        bike_search = lt.newList(datastructure = "ARRAY_LIST")
+        mp.put(table, int(float(bikeid)), bike_search)
+    lt.addLast(bike_search, trip)
 
 # Funciones para creacion de datos
 
 # Funciones de consulta
 
-def totalStops(analyzer):
+def totalStops(graph):
     """Retorna el total de estaciones (vertices) del grafo """
-    return gr.numVertices(analyzer['connections'])
+    return gr.numVertices(graph)
 
-def totalConnections(analyzer):
+def totalConnections(graph):
     """Retorna el total arcos del grafo"""
-    return gr.numEdges(analyzer['connections'])
+    return gr.numEdges(graph)
 
 def indegree(analyzer, vertex):
-    return gr.indegree(analyzer["connections"], vertex)
+    return gr.indegree(analyzer, vertex)
 
 def outdegree(analyzer, vertex):
-    return gr.outdegree(analyzer["connections"], vertex)
+    return gr.outdegree(analyzer, vertex)
 
 def more_trips_datetime(dict):
     """Esta función retorna la fecha_hora con mayor frecuencia de viajes"""
@@ -270,6 +284,77 @@ def minTime(analyzer, startStation, endStation):
     nStops = lt.size(pila) + 1
     nRoutes = lt.size(pila) 
     return tiempoTotal, nStops, nRoutes, pila 
+
+#Requerimiento 6
+def addBikeGraph(analyzer, viajes):
+    analyzer["gBikeId"] = gr.newGraph(datastructure='ADJ_LIST',
+                                              directed=True,
+                                              size=50)
+    suma = {}
+    lista = []
+    total_duration = 0
+    for viaje in lt.iterator(viajes):
+        total_duration += int(float(viaje["Trip  Duration"]))
+        start_station_name = viaje["Start Station Name"]
+        end_station_name = viaje["End Station Name"]
+        start_station_id = viaje["Start Station Id"]
+        end_station_id = viaje["End Station Id"]
+        if not gr.containsVertex(analyzer["gBikeId"],str(int(start_station_id))+ "-" + start_station_name):
+            gr.insertVertex(analyzer["gBikeId"], str(int(start_station_id))+ "-" + start_station_name)
+            #lt.addLast(vertices, str(int(start_station_id))+ "-" + start_station_name)
+      
+        if not gr.containsVertex(analyzer["gBikeId"], str(int(end_station_id))+"-"+end_station_name):
+            gr.insertVertex(analyzer["gBikeId"], str(int(end_station_id))+"-"+end_station_name)
+            #lt.addLast(vertices, str(int(end_station_id))+"-"+end_station_name)
+     
+        if str(int(start_station_id))+ "-" + start_station_name + "--" + str(int(end_station_id))+"-"+end_station_name not in lista:
+            lista.append(str(int(start_station_id))+ "-" + start_station_name + "--" + str(int(end_station_id))+"-"+end_station_name)
+            suma[str(int(start_station_id))+ "-" + start_station_name , str(int(end_station_id))+"-"+end_station_name] = 1
+        else:
+            suma[str(int(start_station_id))+ "-" + start_station_name , str(int(end_station_id))+"-"+end_station_name] += 1
+    for key in suma:
+        A, B = key[0], key[1]
+        gr.addEdge(analyzer["gBikeId"], A, B, suma[key])
+    return total_duration
+
+def bikeId(analyzer, bike_id):
+    tabla = analyzer["bike_id"]
+    entry = mp.get(tabla, bike_id)
+    viajes = me.getValue(entry)
+    total_duration = addBikeGraph(analyzer, viajes)
+    total_viajes = lt.size(viajes)
+    arcos = gr.edges(analyzer["gBikeId"])
+    vertices = gr.vertices(analyzer["gBikeId"])
+    #dic_indegree, dic_outdegree = {}, {}
+    dic_intrip, dic_outtrip = {}, {}
+    
+    for ver in lt.iterator(vertices):
+        #dic_indegree[ver] = gr.indegree(analyzer["gBikeId"], ver)
+        #dic_outdegree[ver] = gr.outdegree(analyzer["gBikeId"], ver)
+        for arc in lt.iterator(arcos):
+            if arc["vertexA"]  == ver:
+                dic_outtrip[ver] = dic_outtrip.get(ver, 0) + arc["weight"]
+            elif arc["vertexB"] == ver:
+                dic_intrip[ver] = dic_intrip.get(ver, 0) + arc["weight"]
+    
+    mayorOut = 0
+    for key, value in dic_outtrip.items():
+        if value > mayorOut:
+            mayorOut = value
+            mayorVertexOut = key
+    
+    mayorIn = 0
+    for key, value in dic_intrip.items():
+        if value > mayorIn:
+            mayorIn = value
+            mayorVertexIn = key
+
+    dic = {}
+    dic["In"] = {"mayor":mayorIn, "vertex":mayorVertexIn, "indegree": gr.indegree(analyzer["gBikeId"], mayorVertexIn)}
+    dic["Out"] = {"mayor":mayorOut, "vertex":mayorVertexOut, "outdegree": gr.indegree(analyzer["gBikeId"], mayorVertexOut)}
+    return total_duration, total_viajes, dic
+    
+
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista

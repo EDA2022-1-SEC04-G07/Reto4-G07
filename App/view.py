@@ -203,6 +203,21 @@ def printMinTime(pila):
     print("\n - Path details:")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
+def printTopOutIn(dic):
+    do = dic["Out"]
+    tabla = [["Station ID", "Station Name", "Out Degree", "Out Trips"],
+            [do["vertex"][:4], do["vertex"][5:], str(do["outdegree"]), str(do["mayor"])]]
+    print("\n+++ Top out station data: +++")
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+    di = dic["In"]
+    tabla2 = [["Station ID", "Station Name", "In Degree", "In Trips"],
+            [di["vertex"][:4], di["vertex"][5:], str(di["indegree"]), str(di["mayor"])]]
+    print("\n+++ Top in station data: +++")
+    print(tabulate.tabulate(tabla2,  tablefmt = "grid"))
+
+    
+
 
 """
 Menu principal
@@ -218,8 +233,8 @@ while True:
         load = controller.loadTrips(cont, "Bikeshare/Bikeshare-ridership-2021-utf8-small.csv")
         viajes = load[1]
         vertices = load[2]
-        numedges = controller.totalConnections(cont)
-        numvertex = controller.totalStops(cont)
+        numedges = controller.totalConnections(cont["connections"])
+        numvertex = controller.totalStops(cont["connections"])
         print("Total de viajes obtenidos: ", viajes)
         print('Numero de vertices: ' + str(numvertex))
         print('Numero de arcos: ' + str(numedges))
@@ -237,7 +252,7 @@ while True:
         maxroutes = int(input("Ingrese el número máximo de rutas de respuesta: "))
         vertex = id+"-"+name
 
-        print("=============== Req No. 2 Inputs ===============")
+        print("\n=============== Req No. 2 Inputs ===============")
         print("Available time:", time, "[seg]")
         print("Minimum number of stations:", minstations)
         print("Maximum numer of routes:", maxroutes)
@@ -245,8 +260,8 @@ while True:
 
         recorridos = controller.Requerimiento2(cont, vertex, time, minstations, maxroutes)
         
-        print("=============== Req No. 2 Answer ===============")
-        print("+++++ The TOP", maxroutes, "routes are: +++++")
+        print("\n=============== Req No. 2 Answer ===============")
+        print("\n+++++ The TOP", maxroutes, "routes are: +++++")
         printPossibleRoutes(recorridos)
 
     elif int(inputs[0]) == 5:
@@ -290,7 +305,26 @@ while True:
         pass
 
     elif int(inputs[0]) == 8:
-        pass
+        bike_id = int(input("Ingrese el ID de la bicicleta: "))
+        print("\n=============== Req No. 6 Inputs ===============")
+        print("Analyze trips with the bike ID", bike_id)
+        req = controller.Requerimiento6(cont, bike_id)
+        numedges = controller.totalConnections(cont["gBikeId"])
+        numvertex = controller.totalStops(cont["gBikeId"])
+        total_duration = req[0] 
+        total_trips = req[1]
+        dic = req[2]
+
+        print("\n=============== Req No. 6 Answer ===============")
+        print(total_trips, "trips with bike ID", bike_id, "\n")
+
+        print(numvertex, "unique stations loaded...")
+        print(numedges, "clean avg trips data loaded...")
+        print("\n\n--- DiGraph specs ---")
+        print("Nodes: ", numvertex, "& Edges:", numedges)
+        print("Total trip time:", total_duration, "[sec].")
+        print("Total trip time:", total_duration/60, "[h].")
+        printTopOutIn(dic)
     
     else:
         sys.exit(0)
