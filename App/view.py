@@ -94,21 +94,115 @@ def printTop5Estaciones_mas_viajes(Top5Estaciones):
     print("Las 5 estaciones con más viajes de origen son: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
+#Requerimiento 2
+def printPossibleRoutes(recorridos):
+    tabla = [["Stop stations", "Route time [s]", "Roundtrip time [s]", "Station IDs", "Station Names"]]
+    
+    for y in range(1, 4):
+        route = lt.getElement(recorridos, y)
+        total_time = 0
+        size = lt.size(route)
+        stationsname, stationsid = "", ""
+        for x in range(lt.size(route), 0, -1):
+            dic = lt.getElement(route, x)
+            total_time += dic["weight"]
+            name = dic["vertexA"][5:]
+            if name == "":
+                name = "Unknown"
+            stationsname += name + " -> "
+            stationsid += dic["vertexA"][:4] + " -> "
+        linea = [str(size), str(total_time), str(total_time*2), stationsid[:-3], stationsname[:-3]]
+        s = pd.Series(linea).str.wrap(20)
+        tabla.append(s)
+    
+    for y in range(lt.size(recorridos)-2, lt.size(recorridos)+1):
+        route = lt.getElement(recorridos, y)
+        total_time = 0
+        size = lt.size(route)
+        stationsname, stationsid = "", ""
+        for x in range(lt.size(route), 0, -1):
+            dic = lt.getElement(route, x)
+            total_time += dic["weight"]
+            name = dic["vertexA"][5:]
+            if name == "":
+                name = "Unknown"
+            stationsname += name + " -> "
+            stationsid += dic["vertexA"][:4] + " -> "
+        linea = [str(size), str(total_time), str(total_time*2), stationsid[:-3], stationsname[:-4]]
+        s = pd.Series(linea).str.wrap(20)
+        tabla.append(s)
+    
+    print("The first 3 and last 3 possible rputes are: ")
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+
+        
+
 #Requerimiento 3      
 def printConnectedComponents(list):
     tabla = [["SSC size", "Max out station ID", "Max out station name", "Max in station ID", "Max in station name"]]
     for i in range(1,4):
         dic = lt.getElement(list, i)
-        linea = [str(dic["size"]), dic["maxStart"][:4], dic["maxStart"][5:], dic["maxEnd"][:4], dic["maxEnd"][5:]]   
+        startName = dic["maxStart"][5:]
+        endName = dic["maxEnd"][5:]
+        if startName == "":
+            startName = "Unknown"
+        if endName == "":
+            endName = "Unknown"
+        linea = [str(dic["size"]), dic["maxStart"][:4], startName, dic["maxEnd"][:4], endName]   
         s = pd.Series(linea).str.wrap(20)
         tabla.append(s)
     for i in range(lt.size(list)-2,lt.size(list)+1):
         dic = lt.getElement(list, i)
-        linea = [str(dic["size"]), dic["maxStart"][:4], dic["maxStart"][5:], dic["maxEnd"][:4], dic["maxEnd"][5:]]   
+        linea = [str(dic["size"]), dic["maxStart"][:4], startName, dic["maxEnd"][:4], endName]   
         s = pd.Series(linea).str.wrap(20)
         tabla.append(s)
     print("The first 3 and last 3 of the SCC are: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+#Requerimiento 4
+def printMinTime(pila):
+    tamano = lt.size(pila)
+    tabla = [["Start Station Id", "Start Station Name", "End Station Id", "End Station Name", "Avg Route Duration"]]
+    if tamano >= 12: 
+        for i in range(tamano, tamano-3,-1):
+            dic = lt.getElement(pila, i)
+            startName = dic["vertexA"][5:]
+            endName = dic["vertexB"][5:]
+            if startName == "":
+                startName = "Unknown"
+            if endName == "":
+                endName = "Unknown"
+            linea = [dic["vertexA"][:4], startName, dic["vertexB"][:4], endName, str(dic["weight"])]
+            s = pd.Series(linea).str.wrap(20)
+            tabla.append(s)
+        for i in range(3, 0,-1):
+            dic = lt.getElement(pila, i)
+            startName = dic["vertexA"][5:]
+            endName = dic["vertexB"][5:]
+            if startName == "":
+                startName = "Unknown"
+            if endName == "":
+                endName = "Unknown"
+            linea = [dic["vertexA"][:4], startName, dic["vertexB"][:4], endName, str(dic["weight"])]
+            s = pd.Series(linea).str.wrap(20)
+            tabla.append(s)
+    else:
+        for i in range(lt.size(pila), 0, -1):
+            dic = lt.getElement(pila, i)
+            startName = dic["vertexA"][5:]
+            endName = dic["vertexB"][5:]
+            if startName == "":
+                startName = "Unknown"
+            if endName == "":
+                endName = "Unknown"
+            linea = [dic["vertexA"][:4], startName, dic["vertexB"][:4], endName, str(dic["weight"])]
+            s = pd.Series(linea).str.wrap(20)
+            tabla.append(s)
+    
+    print("\n - Path details:")
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
 
 """
 Menu principal
@@ -136,12 +230,24 @@ while True:
         printTop5Estaciones_mas_viajes(Top5Estaciones)
 
     elif int(inputs[0]) == 4:
-        vertex = input("Ingrese la estación de inicio o salida: ")
-        time = input("Ingrese el tiempo máximo que puede tomar el viaje: ")
-        minstations = input("Ingrese el número minimo de estaciones de parada para la ruta: ")
-        maxroutes = input("Ingrese el número máximo de rutas de respuesta: ")
+        name = input("Ingrese el nombre de la estación de inicio o salida: ")
+        id = input("Ingrese el ID de la estación de inicio o salida: ")
+        time = float(input("Ingrese el tiempo máximo que puede tomar el viaje en mins: "))
+        minstations = int(input("Ingrese el número minimo de estaciones de parada para la ruta: "))
+        maxroutes = int(input("Ingrese el número máximo de rutas de respuesta: "))
+        vertex = id+"-"+name
+
+        print("=============== Req No. 2 Inputs ===============")
+        print("Available time:", time, "[seg]")
+        print("Minimum number of stations:", minstations)
+        print("Maximum numer of routes:", maxroutes)
+        print("Starting station: ", vertex)
+
         recorridos = controller.Requerimiento2(cont, vertex, time, minstations, maxroutes)
-        print(recorridos)
+        
+        print("=============== Req No. 2 Answer ===============")
+        print("+++++ The TOP", maxroutes, "routes are: +++++")
+        printPossibleRoutes(recorridos)
 
     elif int(inputs[0]) == 5:
         print("=============== Req No. 3 Inputs ===============")
@@ -158,8 +264,28 @@ while True:
 
 
     elif int(inputs[0]) == 6:
-        pass
+        startid = input("Ingrese el ID de la estación de inicio: ")
+        startname = input("Ingrese el nombre de la estación de inicio: ")
+        endid = input("Ingrese el ID de la estación de llegada: ")
+        endname = input("Ingrese el nombre de la estación de llegada: ")
+        
+        print("\n=============== Req No. 4 Inputs ===============")
+        print("Start station:", startname, "with ID:", startid)
+        print("End station:", endname, "with ID:", endid)
+        
+        req = controller.Requerimiento4(cont, startid+"-"+startname, endid+"-"+endname)
+        totalTime = req[0]
+        nStops = req[1]
+        nRoutes = req[2]
+        pila = req[3]
 
+        print("\n=============== Req No. 4 Answer ===============")
+        print("+++ Dijkstra's Trip details +++")
+        print(" - Number of stops:", nStops)
+        print(" - Number of routes:", nRoutes)
+        print(" - Total time [seg]:", totalTime)
+        printMinTime(pila)
+        
     elif int(inputs[0]) == 7:
         pass
 

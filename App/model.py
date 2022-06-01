@@ -187,7 +187,7 @@ def Top5estaciones_mas_viajes(analyzer):
         info["more_trips_datetime"] = more_trips_datetime(info["datetime_start"])
         lt.addLast(lista_estaciones, info)
 
-    sorted_list = mes.sort(lista_estaciones, cmpOutDegree)
+    sorted_list = ms.sort(lista_estaciones, cmpOutDegree)
     Top5Estaciones = lt.subList(sorted_list, 1, 5)
     return Top5Estaciones
 
@@ -199,16 +199,25 @@ def cmpOutDegree(estacion1, estacion2):
 
 # Requerimiento 2
 def possibleRoutes(analyzer, vertex, time, minstations, maxroutes):
-    recorridos = dfs.DepthFirstSearch(analyzer["connections"], vertex)
-    lista = (mp.keySet(recorridos["visited"]))
-    lista2 = (mp.valueSet(recorridos["visited"]))
-    for i in range(1, lt.size(lista)+1):
-        print(lt.getElement(lista, i))
-        print(lt.getElement(lista2, i))
+    minCost = djk.Dijkstra(analyzer["connections"], vertex)
+    vertices = gr.vertices(analyzer["connections"])
+    recorridos = lt.newList("ARRAY_LIST")
+    nRoutes = 1
+    for vertex in lt.iterator(vertices):
+        pila = djk.pathTo(minCost, vertex)
+        if pila != None:
+            totaltime = 0
+            size = lt.size(pila)
+            for dic in lt.iterator(pila):
+                totaltime += dic["weight"]
+            if time >= totaltime*2 and minstations <= size and nRoutes <= maxroutes:
+                lt.addLast(recorridos, pila)
+                nRoutes += 1
+    return recorridos 
+            
 
 
 # Requerimiento 3 
-
 def kosarajuTable(analyzer, componentes):
     estaciones = mp.keySet(componentes["idscc"])
     analyzer['kosaraju_table'] = mp.newMap(562000, maptype='PROBING', loadfactor=0.5)
@@ -254,8 +263,14 @@ def connectedComponents(analyzer):
 # Requerimiento 4
 def minTime(analyzer, startStation, endStation):
     minCost = djk.Dijkstra(analyzer["connections"], startStation)
-    pila = djk.hasPathTo(minCost, endStation)
-    
+    pila = djk.pathTo(minCost, endStation)
+    tiempoTotal = 0
+    for dic in lt.iterator(pila):
+        tiempoTotal+= dic["weight"]
+    nStops = lt.size(pila) + 1
+    nRoutes = lt.size(pila) 
+    return tiempoTotal, nStops, nRoutes, pila 
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

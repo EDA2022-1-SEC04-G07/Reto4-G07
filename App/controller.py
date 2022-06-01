@@ -122,3 +122,6 @@ def Requerimiento2(analyzer, vertex, time, minstations, maxroutes):
 def Requerimiento3(analyzer):
     return model.connectedComponents(analyzer)
 
+#Requerimiento 4
+def Requerimiento4(analyzer, startStation, endStation):
+    return model.minTime(analyzer, startStation, endStation)
