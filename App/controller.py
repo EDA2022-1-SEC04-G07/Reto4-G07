@@ -54,14 +54,12 @@ def loadTrips(analyzer, tripsfile):
     tripsfile = cf.data_dir + tripsfile
     input_file = csv.DictReader(open(tripsfile, encoding="utf-8"), delimiter=",")
     viajes = 0
-    contador = 0
+    
     for trip in input_file:
         stopid = trip['End Station Id'] != "" and trip["Start Station Id"] != ""
         bikeid = trip["Bike Id"] != ""
         tripduration = trip["Trip  Duration"] != ""
         if stopid and bikeid and tripduration:
-            if str(int(float(trip['Start Station Id'])))+ "-" + trip['Start Station Name'] == str(int(float(trip['End Station Id'])))+"-" +trip['End Station Name'] :
-                contador+=1
             difcero = int(float(trip["Trip  Duration"])) > 0
             trip['End Station Id'] = int(float(trip['End Station Id']))
             trip['Start Station Id'] = int(float(trip['Start Station Id']))
@@ -87,7 +85,7 @@ def loadTrips(analyzer, tripsfile):
                 model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], None, False)
                 model.addBikeId(analyzer, trip, trip["Bike Id"])
                 viajes += 1
-    print(contador)
+   
     vertices = model.addGraph(analyzer)
     return analyzer, viajes , vertices
 
