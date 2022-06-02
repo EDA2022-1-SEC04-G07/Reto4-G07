@@ -25,6 +25,7 @@
  """
 
 
+from doctest import ELLIPSIS_MARKER
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -441,9 +442,16 @@ def bikeId(analyzer, bike_id):
         #dic_outdegree[ver] = gr.outdegree(analyzer["gBikeId"], ver)
         for arc in lt.iterator(arcos):
             if arc["vertexA"]  == ver:
-                dic_outtrip[ver] = dic_outtrip.get(ver, 0) + arc["weight"]
+                if ver not in dic_outtrip:
+                    dic_outtrip[ver] = arc["weight"]
+                else:
+                    dic_outtrip[ver] += arc["weight"]
+                
             elif arc["vertexB"] == ver:
-                dic_intrip[ver] = dic_intrip.get(ver, 0) + arc["weight"]
+                if ver not in dic_intrip:
+                    dic_intrip[ver] = arc["weight"]
+                else:
+                    dic_intrip[ver] += arc["weight"]
     
     mayorOut = 0
     for key, value in dic_outtrip.items():
@@ -459,7 +467,7 @@ def bikeId(analyzer, bike_id):
 
     dic = {}
     dic["In"] = {"mayor":mayorIn, "vertex":mayorVertexIn, "indegree": gr.indegree(analyzer["gBikeId"], mayorVertexIn)}
-    dic["Out"] = {"mayor":mayorOut, "vertex":mayorVertexOut, "outdegree": gr.indegree(analyzer["gBikeId"], mayorVertexOut)}
+    dic["Out"] = {"mayor":mayorOut, "vertex":mayorVertexOut, "outdegree": gr.outdegree(analyzer["gBikeId"], mayorVertexOut)}
     return total_duration, total_viajes, dic
     
 
