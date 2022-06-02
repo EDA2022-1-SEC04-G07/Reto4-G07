@@ -127,7 +127,7 @@ def addTrips(table, station, info_trip):
 def addStations(table, station_id_name, date_time, usertype, startStation): 
     """Esta función adiciona una estación a la tabla de hash de estaciones """
 
-    date, time = date_time.date(), date_time.time().hour
+    date, time = date_time.date().strftime("%m/%d/%Y"), date_time.time().hour
 
     existstation = mp.contains(table, station_id_name)
     if not existstation:
