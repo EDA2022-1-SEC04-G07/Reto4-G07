@@ -438,8 +438,6 @@ def bikeId(analyzer, bike_id):
     dic_intrip, dic_outtrip = {}, {}
     
     for ver in lt.iterator(vertices):
-        #dic_indegree[ver] = gr.indegree(analyzer["gBikeId"], ver)
-        #dic_outdegree[ver] = gr.outdegree(analyzer["gBikeId"], ver)
         for arc in lt.iterator(arcos):
             if arc["vertexA"]  == ver:
                 if ver not in dic_outtrip:
