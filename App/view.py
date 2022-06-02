@@ -253,7 +253,7 @@ while True:
         cont = controller.init()
 
     elif int(inputs[0]) == 2:
-        load = controller.loadTrips(cont, "Bikeshare/Bikeshare-ridership-2021-utf8-small.csv")
+        load = controller.loadTrips(cont, "Bikeshare/Bikeshare-ridership-2021-utf8-large.csv")
         viajes = load[1]
         vertices = load[2]
         numedges = controller.totalConnections(cont["connections"])
