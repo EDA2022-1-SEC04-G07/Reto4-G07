@@ -339,6 +339,8 @@ def suscriberTripsInDateRange(analyzer, start_date, end_date):
                 addStations(suscriber_stations_table, end_station_name_id, trip["End Time"], None, False)
     
     n_trips = mp.size(tripsInDateRange) # Numero de viajes iniciados y finalizados en el rango de fechas
+    
+    # Creación del grafo
     suscriberConnections, total_timeTrip = createGraphSuscriber(tripsInDateRange)
 
     answer = {"start_rush_hour": ("", 0), "end_rush_hour":("", 0), "topOutStation": ("", 0, 0), "topInStation": ("", 0, 0)}
