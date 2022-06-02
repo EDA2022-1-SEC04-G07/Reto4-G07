@@ -54,38 +54,39 @@ def loadTrips(analyzer, tripsfile):
     tripsfile = cf.data_dir + tripsfile
     input_file = csv.DictReader(open(tripsfile, encoding="utf-8"), delimiter=",")
     viajes = 0
-    
     for trip in input_file:
         stopid = trip['End Station Id'] != "" and trip["Start Station Id"] != ""
         bikeid = trip["Bike Id"] != ""
         tripduration = trip["Trip  Duration"] != ""
         if stopid and bikeid and tripduration:
             difcero = int(float(trip["Trip  Duration"])) > 0
-            trip['End Station Id'] = int(float(trip['End Station Id']))
-            trip['Start Station Id'] = int(float(trip['Start Station Id']))
-            difstop = str(int(float(trip['Start Station Id'])))+ "-" + trip['Start Station Name'] != str(int(float(trip['End Station Id'])))+"-" +trip['End Station Name'] 
+            trip['End Station Id'] = str(int(float(trip['End Station Id'])))
+            trip['Start Station Id'] = str(int(float(trip['Start Station Id'])))
+            difstop = trip['Start Station Name'] != trip['End Station Name'] 
             #difstop = int(float(trip['Start Station Id'])) != int(float(trip['End Station Id'])) 
             if difstop and difcero:
+
                 try:
-                    trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%d/%m/%Y %H:%M") 
+                    trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%m/%d/%Y %H:%M")
                 except Exception:
-                    try:
-                        trip["Start Time"] = datetime.datetime.strptime(trip["Start Time"], "%m/%d/%Y %H:%M")
-                    except Exception:
-                        print(trip["Start Time"])
+                    print(trip["Start Time"])
+            
                 try:
-                    trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%d/%m/%Y %H:%M") 
+                    trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%m/%d/%Y %H:%M") 
                 except Exception:
-                    try:
-                        trip["End Time"] = datetime.datetime.strptime(trip["End Time"], "%m/%d/%Y %H:%M") 
-                    except Exception:
-                        print( trip["End Time"])
-                model.addTrips(analyzer, trip, str(int(trip["Start Station Id"]))+ "-"+trip["Start Station Name"]+"--"+str(int(trip["End Station Id"]))+ "-" + trip["End Station Name"])
-                model.addStations(analyzer, trip["Start Station Id"], trip["Start Station Name"], trip["Start Time"], trip["User Type"], True)
-                model.addStations(analyzer, trip["End Station Id"], trip["End Station Name"], trip["End Time"], None, False)
+                    print(trip["End Time"])
+
+                startStation_name_id = trip["Start Station Id"] + "-" + trip["Start Station Name"]
+                endStation_name_id = trip["End Station Id"] + "-" + trip["End Station Name"]
+                model.addTrips(analyzer['trip_table'], startStation_name_id + "--" + endStation_name_id, trip)
+                model.addStations(analyzer['stations_table'], startStation_name_id, trip["Start Time"], trip["User Type"], True)
+                model.addStations(analyzer['stations_table'], endStation_name_id, trip["End Time"], None, False)
                 model.addBikeId(analyzer, trip, trip["Bike Id"])
+                
+                if trip["User Type"] == "Annual Member":
+                    model.addDateTrips(analyzer, trip["Start Time"].date(), trip)
                 viajes += 1
-   
+    
     vertices = model.addGraph(analyzer)
     return analyzer, viajes , vertices
 
@@ -107,10 +108,10 @@ def totalConnections(analyzer):
     return model.totalConnections(analyzer)
 
 def indegree(analyzer, vertex):
-    return model.indegree(analyzer["connections"], vertex)
+    return model.indegree(analyzer, vertex)
 
 def outdegree(analyzer, vertex):
-    return model.outdegree(analyzer["connections"], vertex)
+    return model.outdegree(analyzer, vertex)
 
 #Requerimiento 1
 def Requerimiento1(analyzer):
@@ -127,6 +128,10 @@ def Requerimiento3(analyzer):
 #Requerimiento 4
 def Requerimiento4(analyzer, startStation, endStation):
     return model.minTime(analyzer, startStation, endStation)
+
+#Requerimiento 5
+def Requerimiento5(analyzer, start_date, end_date):
+    return model.suscriberTripsInDateRange(analyzer, start_date, end_date)
 
 #Requerimiento 6
 def Requerimiento6(analyzer, bike_id):

@@ -57,8 +57,8 @@ def optiontwo(analyzer, vertices):
 
     for index in range(1,6):
         vertex = lt.getElement(vertices, index)
-        indegree = controller.indegree(analyzer, vertex)
-        outdegree = controller.outdegree(analyzer, vertex)
+        indegree = controller.indegree(analyzer["connections"], vertex)
+        outdegree = controller.outdegree(analyzer["connections"], vertex)
         entry = mp.get(tabla, vertex)
         stationid = me.getValue(entry)["station_id"]
         stationname = me.getValue(entry)["station_name"]
@@ -70,8 +70,8 @@ def optiontwo(analyzer, vertices):
 
     for index in range(lt.size(vertices)-4, lt.size(vertices)+1):
         vertex = lt.getElement(vertices, index)
-        indegree = controller.indegree(analyzer, vertex)
-        outdegree = controller.outdegree(analyzer, vertex)
+        indegree = controller.indegree(analyzer["connections"], vertex)
+        outdegree = controller.outdegree(analyzer["connections"], vertex)
         entry = mp.get(tabla, vertex)
         stationid = me.getValue(entry)["station_id"]
         stationname = me.getValue(entry)["station_name"]
@@ -85,13 +85,12 @@ def optiontwo(analyzer, vertices):
 
 #Requerimiento 1       
 def printTop5Estaciones_mas_viajes(Top5Estaciones):
-    tabla = [["Station Name", "Station Id", "nViajes", "nCasual", "nAnnual", "datetimeMoreTrips"]]
+    tabla = [["Station Id", "Station Name", "Out Trips", "Suscriber Out Trips", "Tourist Out Trips", "Out Degree(Routes)", "Rush hour", "Rush date"]]
     for index in range(1,6):
         info= lt.getElement(Top5Estaciones, index)
-        linea = [info["station_name"], str(info["station_id"]), str(info["outdegree"]), str(info["nCasual"]), str(info["nAnnual"]), str(info["more_trips_datetime"])]   
+        linea = [info["station_id"], info["station_name"], str(info["nTripsStart"]),  str(info["nSuscriber"]), str(info["nTourist"]), str(info["outdegree"]), info["start_rush_hour"], info["start_rush_date"]]   
         s = pd.Series(linea).str.wrap(20)
         tabla.append(s)
-    print("Las 5 estaciones con más viajes de origen son: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
 #Requerimiento 2
@@ -135,8 +134,6 @@ def printPossibleRoutes(recorridos):
     print("The first 3 and last 3 possible rputes are: ")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
-
-        
 
 #Requerimiento 3      
 def printConnectedComponents(list):
@@ -203,6 +200,35 @@ def printMinTime(pila):
     print("\n - Path details:")
     print(tabulate.tabulate(tabla,  tablefmt = "grid"))
 
+
+#Requerimiento 5
+def printSuscriberTripsInDateRange(answer):
+    print("\n+++ Top out station data: +++")
+    tabla = [["Station Id", "Station Name", "Out Degree(Routes)", "Out Trips"], 
+    [answer["topOutStation"][0][:4], answer["topOutStation"][0][5:], answer["topOutStation"][2], answer["topOutStation"][1]]]
+    s = pd.Series(tabla).str.wrap(20)
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+    print("\n+++ Top in station data: +++")
+    tabla = [["Station Id", "Station Name", "In Degree(Routes)", "In Trips"], 
+    [answer["topInStation"][0][:4], answer["topInStation"][0][5:], answer["topInStation"][2], answer["topInStation"][1]]]
+    s = pd.Series(tabla).str.wrap(20)
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+    print("\n+++ Top out trips rush hour station data: +++")
+    tabla = [["Station Id", "Station Name", "Out rush hour", "Out rush hour count"], 
+    [answer["topOutStation"][0][:4], answer["topOutStation"][0][5:], answer["start_rush_hour"][1], answer["start_rush_hour"][0]]]
+    s = pd.Series(tabla).str.wrap(20)
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+
+    print("\n+++ Top in trips rush hour station data: +++")
+    tabla = [["Station Id", "Station Name", "In rush hour", "In rush hour count"], 
+    [answer["topInStation"][0][:4], answer["topInStation"][0][5:], answer["end_rush_hour"][1], answer["end_rush_hour"][0]]]
+    s = pd.Series(tabla).str.wrap(20)
+    print(tabulate.tabulate(tabla,  tablefmt = "grid"))
+          
+
+#Requerimiento 6
 def printTopOutIn(dic):
     do = dic["Out"]
     tabla = [["Station ID", "Station Name", "Out Degree", "Out Trips"],
@@ -215,9 +241,6 @@ def printTopOutIn(dic):
             [di["vertex"][:4], di["vertex"][5:], str(di["indegree"]), str(di["mayor"])]]
     print("\n+++ Top in station data: +++")
     print(tabulate.tabulate(tabla2,  tablefmt = "grid"))
-
-    
-
 
 """
 Menu principal
@@ -241,8 +264,15 @@ while True:
         optiontwo(cont, vertices)
 
     elif int(inputs[0]) == 3:
+        print("=============== Req No. 1 Inputs ===============")
+        print("Top 5 stations inside in the bikeshre Network")
+        print('Number of stations in the network: ' + str(controller.totalStops(cont['connections'])))
+        
+        print("=============== Req No. 1 Answer ===============")
+        print("Top 5 stations used as trip origins are: ")
         Top5Estaciones = controller.Requerimiento1(cont)
         printTop5Estaciones_mas_viajes(Top5Estaciones)
+
 
     elif int(inputs[0]) == 4:
         name = input("Ingrese el nombre de la estación de inicio o salida: ")
@@ -302,7 +332,18 @@ while True:
         printMinTime(pila)
         
     elif int(inputs[0]) == 7:
-        pass
+        start_date = input("Ingrese la Fecha inicial de consulta (formato “%m/%d/%Y”): ") 
+        end_date =  input("Ingrese la Fecha final de consulta (formato “%m/%d/%Y”): ") 
+        print("=============== Req No. 5 Inputs ===============")
+        print("Analyze trips between ", start_date, " and ", end_date)
+        
+        suscriberConnections, total_timeTrip, n_trips, answer = controller.Requerimiento5(cont, start_date, end_date)
+        print("=============== Req No. 5 Answer ===============")
+        print(n_trips, "trips between", start_date, " and ", end_date)
+        vertices = controller.totalStops(suscriberConnections)
+        arcos = controller.totalConnections(suscriberConnections)
+        print("Vertices (estaciones): ", vertices, "& Edges (trips): ", arcos)
+        printSuscriberTripsInDateRange(answer)
 
     elif int(inputs[0]) == 8:
         bike_id = int(input("Ingrese el ID de la bicicleta: "))
